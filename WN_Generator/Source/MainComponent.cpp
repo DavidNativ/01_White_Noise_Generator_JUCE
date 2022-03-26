@@ -3,9 +3,8 @@
 //==============================================================================
 MainComponent::MainComponent()
 {
-    // Make sure you set the size of the component after
-    // you add any child components.
-    setSize (800, 600);
+    /* As mentioned above, the call to the AudioAppComponent::setAudioChannels() function triggers 
+    the audio system to start up. In particular, it will call the prepareToPlay() function  */
 
     // Some platforms require permissions to open input channels so request that here
     if (juce::RuntimePermissions::isRequired (juce::RuntimePermissions::recordAudio)
@@ -17,8 +16,13 @@ MainComponent::MainComponent()
     else
     {
         // Specify the number of input and output channels that we want to open
-        setAudioChannels (2, 2);
+        setAudioChannels (0, 2);
     }
+    // [1] Set the app window size 
+    setSize(800, 600);
+    // [2] Set the audio channels : no input, 2 outputs
+    setAudioChannels(0, 2);
+
 }
 
 MainComponent::~MainComponent()
@@ -37,6 +41,17 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     // but be careful - it will be called on the audio thread, not the GUI thread.
 
     // For more details, see the help for AudioProcessor::prepareToPlay()
+
+    /*[3] In this case we don't really need to do anything here, but as it is a pure virtual 
+    function we must implement at least an empty function. Here we log some useful information 
+    that we can gain about the audio system on the target device at this point.
+    */
+    juce::String message;
+    message << "Preparing to play audio...\n";
+    message << "samplePerBlockExpected = " << samplesPerBlockExpected << "\n";
+    message << "sampleRate = " << sampleRate;
+    juce::Logger::getCurrentLogger()->writeToLog(message);
+
 }
 
 void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
@@ -45,9 +60,17 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
 
     // For more details, see the help for AudioProcessor::getNextAudioBlock()
 
-    // Right now we are not producing any data, in which case we need to clear the buffer
-    // (to prevent the output of random noise)
-    bufferToFill.clearActiveBufferRegion();
+    //[6]
+    for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); channel++)
+    {
+        // Get a pointer to the start sample in the buffer for this audio output channel
+        auto* buffer = bufferToFill.buffer->getWritePointer(channel, bufferToFill.startSample);
+
+        // Fill the required number of samples with noise between -0.125 and +0.125
+        for (auto sample = 0; sample < bufferToFill.numSamples; ++sample)
+            buffer[sample] = random.nextFloat() * 0.25f - 0.125f;
+    }
+    
 }
 
 void MainComponent::releaseResources()
@@ -56,6 +79,9 @@ void MainComponent::releaseResources()
     // restarted due to a setting change.
 
     // For more details, see the help for AudioProcessor::releaseResources()
+
+    // [5]
+    juce::Logger::getCurrentLogger()->writeToLog("Releasing audio resources");
 }
 
 //==============================================================================
@@ -73,3 +99,5 @@ void MainComponent::resized()
     // If you add any child components, this is where you should
     // update their positions.
 }
+
+

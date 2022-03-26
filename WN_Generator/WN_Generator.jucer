@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="YWww3u" name="WN_Generator" projectType="guiapp" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
+              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
+              cppLanguageStandard="17">
   <MAINGROUP id="Fbfhz2" name="WN_Generator">
     <GROUP id="{AC2894D7-27EE-8196-3D20-EAC367EE8CA6}" name="Source">
       <FILE id="GA0vtg" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
